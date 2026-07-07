@@ -19,16 +19,16 @@ const PAYMENT_METHODS: Option[] = [
   { name: "Bank Transfer", emoji: "🏦" },
   { name: "ACH", logo: payLogo("ACH.png") },
   { name: "Credit Card", logo: payLogo("Cards.png") },
-  { name: "Venmo", logo: "/images/payment/venmo.svg" },
+  { name: "Venmo", logo: payLogo("Venmo.png") },
   { name: "Chime", logo: payLogo("Chime.png") },
-  { name: "PayPal", logo: "/images/payment/paypal.svg" },
-  { name: "Crypto", logo: "/images/payment/bitcoin.svg" },
+  { name: "PayPal", logo: payLogo("Paypal.png") },
+  { name: "Crypto", logo: payLogo("Bitcoin.png") },
   { name: "Apple Pay", logo: payLogo("ApplePay.png") },
   { name: "Google Pay", logo: payLogo("Google Pay.png") },
   { name: "Gift Card", emoji: "🎁" },
-  { name: "Cash App", logo: payLogo("CashApp.png") },
-  { name: "e-Transfer", emoji: "📧" },
-  { name: "Zelle", logo: "/images/payment/zelle.svg" },
+  { name: "Cash App", logo: payLogo("Cash App.png") },
+  { name: "e-Transfer", logo: payLogo("e-Transfer.png") },
+  { name: "Zelle", logo: payLogo("zelle.png") },
 ];
 
 const BANKS: Option[] = [
@@ -67,10 +67,12 @@ function OptionDropdown({
         <span className="flex items-center gap-2">
           {selected ? (
             selected.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default
-              <img src={selected.logo} alt="" width={20} height={20} className="h-5 w-5 object-contain" />
+              <span className="flex h-7 w-7 items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default */}
+                <img src={selected.logo} alt="" className="max-h-full max-w-full object-contain" />
+              </span>
             ) : (
-              <span className="text-lg leading-none">{selected.emoji}</span>
+              <span className="flex h-7 w-7 items-center justify-center text-lg leading-none">{selected.emoji}</span>
             )
           ) : null}
           <span className={selected ? "text-neutral-900" : "text-neutral-400"}>
@@ -95,12 +97,14 @@ function OptionDropdown({
                   : "border-neutral-200 hover:border-neutral-400"
               }`}
             >
-              {option.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default
-                <img src={option.logo} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
-              ) : (
-                <span className="text-2xl leading-none">{option.emoji}</span>
-              )}
+              <span className="flex h-11 w-11 items-center justify-center">
+                {option.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default
+                  <img src={option.logo} alt="" className="max-h-full max-w-full object-contain" />
+                ) : (
+                  <span className="text-3xl leading-none">{option.emoji}</span>
+                )}
+              </span>
               <span className="text-xs font-medium text-neutral-700">{option.name}</span>
             </button>
           ))}
