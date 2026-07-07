@@ -22,7 +22,7 @@ const PAYMENT_METHODS: Option[] = [
   { name: "Venmo", logo: payLogo("Venmo.png") },
   { name: "Chime", logo: payLogo("Chime.png") },
   { name: "PayPal", logo: payLogo("Paypal.png") },
-  { name: "Crypto", logo: payLogo("Bitcoin.png") },
+  { name: "Cryptocurrency", logo: payLogo("Bitcoin.png") },
   { name: "Apple Pay", logo: payLogo("ApplePay.png") },
   { name: "Google Pay", logo: payLogo("Google Pay.png") },
   { name: "Gift Card", logo: payLogo("Cards.png") },
