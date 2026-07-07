@@ -8,6 +8,108 @@ import { useCart, type CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { firstGbpAmount, formatGbpAmount, getGbpRates, type GbpRates } from "@/lib/currency";
 
+const WHATSAPP_NUMBER = "237670666946";
+
+type Option = { name: string; logo?: string; emoji?: string };
+
+const payLogo = (file: string) => `/images/payment/${encodeURIComponent(file)}`;
+const bankLogo = (file: string) => `/images/banks/${encodeURIComponent(file)}`;
+
+const PAYMENT_METHODS: Option[] = [
+  { name: "Bank Transfer", emoji: "🏦" },
+  { name: "ACH", logo: payLogo("ACH.png") },
+  { name: "Credit Card", logo: payLogo("Cards.png") },
+  { name: "Venmo", logo: "/images/payment/venmo.svg" },
+  { name: "Chime", logo: payLogo("Chime.png") },
+  { name: "PayPal", logo: "/images/payment/paypal.svg" },
+  { name: "Crypto", logo: "/images/payment/bitcoin.svg" },
+  { name: "Apple Pay", logo: payLogo("ApplePay.png") },
+  { name: "Google Pay", logo: payLogo("Google Pay.png") },
+  { name: "Gift Card", emoji: "🎁" },
+  { name: "Cash App", logo: payLogo("CashApp.png") },
+  { name: "e-Transfer", emoji: "📧" },
+  { name: "Zelle", logo: "/images/payment/zelle.svg" },
+];
+
+const BANKS: Option[] = [
+  { name: "Barclays", logo: bankLogo("Barclays.png") },
+  { name: "BNP Paribas", logo: bankLogo("BNP Paribas.png") },
+  { name: "Credit Agricole", logo: bankLogo("Credit Agricole.png") },
+  { name: "HSBC Holdings", logo: bankLogo("HSBC Holdings.png") },
+  { name: "Lloyds Bank", logo: bankLogo("Lloyds Bank.png") },
+  { name: "Santander", logo: bankLogo("Santander.png") },
+  { name: "Societe Generale", logo: bankLogo("Societe Generale.png") },
+  { name: "UBS Group AG", logo: bankLogo("UBS Group AG.png") },
+];
+
+function OptionDropdown({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: Option[];
+  value: string;
+  onChange: (name: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.name === value);
+
+  return (
+    <div className="relative">
+      <label className="text-sm font-medium text-neutral-700">{label}</label>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="mt-1.5 flex w-full items-center justify-between rounded-lg border border-neutral-300 px-3 py-2.5 text-left focus:border-[#1b6b80] focus:outline-none"
+      >
+        <span className="flex items-center gap-2">
+          {selected ? (
+            selected.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default
+              <img src={selected.logo} alt="" width={20} height={20} className="h-5 w-5 object-contain" />
+            ) : (
+              <span className="text-lg leading-none">{selected.emoji}</span>
+            )
+          ) : null}
+          <span className={selected ? "text-neutral-900" : "text-neutral-400"}>
+            {selected?.name ?? `Select ${label.toLowerCase()}`}
+          </span>
+        </span>
+        <span className="text-neutral-400">▾</span>
+      </button>
+      {open && (
+        <div className="absolute z-10 mt-1 grid max-h-64 w-full grid-cols-3 gap-2 overflow-auto rounded-lg border border-neutral-200 bg-white p-2 shadow-lg">
+          {options.map((option) => (
+            <button
+              key={option.name}
+              type="button"
+              onClick={() => {
+                onChange(option.name);
+                setOpen(false);
+              }}
+              className={`flex flex-col items-center gap-1.5 rounded-lg border p-2.5 text-center transition-colors ${
+                value === option.name
+                  ? "border-[#1b6b80] bg-[#eef7f9]"
+                  : "border-neutral-200 hover:border-neutral-400"
+              }`}
+            >
+              {option.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element -- local logo, next/image blocks SVGs by default
+                <img src={option.logo} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
+              ) : (
+                <span className="text-2xl leading-none">{option.emoji}</span>
+              )}
+              <span className="text-xs font-medium text-neutral-700">{option.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,6 +121,8 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(!!buySlug);
   const [rates, setRates] = useState<GbpRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [payment, setPayment] = useState("");
+  const [bank, setBank] = useState("");
 
   useEffect(() => {
     getGbpRates().then(setRates);
@@ -50,8 +154,28 @@ function CheckoutContent() {
   const items = buySlug ? (buyNowItem ? [buyNowItem] : []) : cartItems;
   const subtotal = items.reduce((sum, i) => sum + i.priceGbp * i.qty, 0);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!payment || (payment === "Bank Transfer" && !bank)) return;
+    const data = new FormData(e.currentTarget);
+    const priceOf = (i: CartItem) =>
+      rates ? formatGbpAmount(i.priceGbp * i.qty, rates) : `£${(i.priceGbp * i.qty).toFixed(2)}`;
+    const lines = items
+      .map((i) => `- ${i.title}${i.size ? ` (${i.size})` : ""} x${i.qty} — ${priceOf(i)}`)
+      .join("\n");
+    const message = [
+      "New Order",
+      `Name: ${data.get("name")}`,
+      `Email: ${data.get("email")}`,
+      `Address: ${data.get("address")}`,
+      `Payment Method: ${payment}${payment === "Bank Transfer" ? ` (${bank})` : ""}`,
+      "",
+      "Items:",
+      lines,
+      "",
+      `Total: ${rates ? formatGbpAmount(subtotal, rates) : `£${subtotal.toFixed(2)}`}`,
+    ].join("\n");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
     setSubmitted(true);
     if (!buySlug) clear();
   }
@@ -61,7 +185,7 @@ function CheckoutContent() {
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1b6b80]">Order Received</h1>
         <p className="mt-3 text-neutral-600">
-          Thanks for your order. We&apos;ll be in touch by email to confirm payment and shipping details.
+          Thanks for your order. If a WhatsApp tab didn&apos;t open, message us directly to confirm payment and shipping details.
         </p>
         <Link href="/products" className="mt-6 inline-block rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]">
           Continue Shopping
@@ -133,7 +257,19 @@ function CheckoutContent() {
           <label className="text-sm font-medium text-neutral-700" htmlFor="address">Shipping Address</label>
           <textarea id="address" name="address" required rows={3} className="mt-1.5 w-full rounded-lg border border-neutral-300 px-3 py-2.5 focus:border-[#1b6b80] focus:outline-none" />
         </div>
-        <p className="text-xs text-neutral-500">Payment isn&apos;t collected here yet — we&apos;ll follow up by email to arrange it.</p>
+        <OptionDropdown
+          label="Payment Method"
+          options={PAYMENT_METHODS}
+          value={payment}
+          onChange={(name) => {
+            setPayment(name);
+            if (name !== "Bank Transfer") setBank("");
+          }}
+        />
+        {payment === "Bank Transfer" && (
+          <OptionDropdown label="Order Banks" options={BANKS} value={bank} onChange={setBank} />
+        )}
+        <p className="text-xs text-neutral-500">Placing your order opens WhatsApp with your order details — hit Send to confirm with us.</p>
         <button type="submit" className="w-full rounded bg-[#6b3fd4] py-3 font-semibold text-white hover:bg-[#5c33bd]">
           Place Order
         </button>
