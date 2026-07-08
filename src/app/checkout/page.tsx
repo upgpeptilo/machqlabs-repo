@@ -8,7 +8,7 @@ import { useCart, type CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { firstGbpAmount, formatGbpAmount, getGbpRates, type GbpRates } from "@/lib/currency";
 
-const WHATSAPP_NUMBER = "237670666946";
+const WHATSAPP_NUMBER = "12033767244";
 
 type Option = { name: string; logo?: string; emoji?: string };
 
