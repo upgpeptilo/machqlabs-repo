@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Product } from "@/lib/products";
+import { priceRange, type Product } from "@/lib/products";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -17,7 +17,7 @@ export default function ProductCard({ product }: { product: Product }) {
       />
       <div className="flex flex-1 flex-col gap-1 px-4 pb-4 text-center">
         <h3 className="font-semibold text-[#1b6b80] group-hover:underline">{product.title}</h3>
-        <p className="text-sm text-neutral-600">{product.price}</p>
+        <p className="text-sm text-neutral-600">{priceRange(product.variants)}</p>
       </div>
     </Link>
   );

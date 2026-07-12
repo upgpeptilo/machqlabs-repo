@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Product } from "@/lib/products";
+import { priceRange, type Product } from "@/lib/products";
 
 export default function AdminProductCard({ product }: { product: Product }) {
   return (
@@ -18,7 +18,7 @@ export default function AdminProductCard({ product }: { product: Product }) {
       />
       <div className="border-t border-neutral-100 p-3 text-center">
         <p className="font-semibold text-neutral-900">{product.title}</p>
-        <p className="text-sm text-neutral-500">{product.price}</p>
+        <p className="text-sm text-neutral-500">{priceRange(product.variants)}</p>
       </div>
     </div>
   );

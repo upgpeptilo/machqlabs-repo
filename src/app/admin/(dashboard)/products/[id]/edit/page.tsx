@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
 import { getProductById } from "@/lib/products";
-import { getGbpRates } from "@/lib/currency";
+import { getUsdRates } from "@/lib/currency";
 import { updateProduct } from "../../../../actions";
 
 export const metadata = { title: "Edit Product – Admin" };
@@ -12,7 +12,7 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [product, rates] = await Promise.all([getProductById(id), getGbpRates()]);
+  const [product, rates] = await Promise.all([getProductById(id), getUsdRates()]);
   if (!product) notFound();
 
   return (

@@ -4,16 +4,17 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/lib/products";
-import { firstGbpAmount } from "@/lib/currency";
+import { formatUsdAmount, type UsdRates } from "@/lib/currency";
 
-export default function ProductActions({ product }: { product: Product }) {
+export default function ProductActions({ product, rates }: { product: Product; rates: UsdRates }) {
   const router = useRouter();
   const { addItem } = useCart();
-  const [size, setSize] = useState(product.sizes[0] ?? "");
-  const priceGbp = firstGbpAmount(product.price);
+  const [variant, setVariant] = useState(product.variants[0]);
+  const size = variant?.size ?? "";
+  const price = variant?.price ?? 0;
 
   function cartItem() {
-    return { slug: product.slug, title: product.title, image: product.image300, priceGbp, size };
+    return { slug: product.slug, title: product.title, image: product.image300, price, size };
   }
 
   function handleAddToBasket() {
@@ -27,22 +28,31 @@ export default function ProductActions({ product }: { product: Product }) {
 
   return (
     <>
-      {product.sizes.length > 0 && (
+      <p className="mt-2 text-xl text-neutral-700">{formatUsdAmount(price, rates)}</p>
+      <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#eef7f9] px-3 py-1 text-xs font-semibold text-[#1b6b80]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+          <path d="M9 2h6v4l1 2v12a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V8l1-2V2Z" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M8 14h8" strokeLinecap="round" />
+        </svg>
+        Pack of 10 vials
+      </span>
+
+      {product.variants.length > 0 && (
         <div className="mt-6">
           <p className="text-sm font-semibold uppercase text-neutral-500">Size</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {product.sizes.map((s) => (
+            {product.variants.map((v) => (
               <button
-                key={s}
+                key={v.size}
                 type="button"
-                onClick={() => setSize(s)}
+                onClick={() => setVariant(v)}
                 className={`rounded border px-3 py-1 text-sm ${
-                  s === size
+                  v.size === size
                     ? "border-[#1b6b80] bg-[#eef7f9] text-[#1b6b80]"
                     : "border-neutral-300 text-neutral-700 hover:border-neutral-400"
                 }`}
               >
-                {s}
+                {v.size}
               </button>
             ))}
           </div>

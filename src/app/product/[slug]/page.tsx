@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, storageText, disclaimerText } from "@/lib/products";
+import { getUsdRates } from "@/lib/currency";
 import ProductActions from "@/components/ProductActions";
 
 export default async function ProductPage({
@@ -12,6 +13,7 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
+  const rates = await getUsdRates();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
@@ -25,9 +27,8 @@ export default async function ProductPage({
         />
         <div>
           <h1 className="text-3xl font-bold text-[#1b6b80]">{product.title}</h1>
-          <p className="mt-2 text-xl text-neutral-700">{product.price}</p>
 
-          <ProductActions product={product} />
+          <ProductActions product={product} rates={rates} />
 
           <div className="mt-10 space-y-2 border-t border-neutral-200 pt-6">
             {product.specs.map((spec) => (

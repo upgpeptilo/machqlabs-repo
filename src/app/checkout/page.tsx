@@ -6,7 +6,8 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart, type CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
-import { firstGbpAmount, formatGbpAmount, getGbpRates, type GbpRates } from "@/lib/currency";
+import { formatUsdAmount, getUsdRates, type UsdRates } from "@/lib/currency";
+import type { ProductVariant } from "@/lib/products";
 
 const WHATSAPP_NUMBER = "12033767244";
 
@@ -102,12 +103,12 @@ function CheckoutContent() {
 
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
   const [loading, setLoading] = useState(!!buySlug);
-  const [rates, setRates] = useState<GbpRates | null>(null);
+  const [rates, setRates] = useState<UsdRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [payment, setPayment] = useState("");
 
   useEffect(() => {
-    getGbpRates().then(setRates);
+    getUsdRates().then(setRates);
   }, []);
 
   useEffect(() => {
@@ -115,17 +116,19 @@ function CheckoutContent() {
     const supabase = createClient();
     supabase
       .from("products")
-      .select("slug, title, price, image300")
+      .select("slug, title, variants, image300")
       .eq("slug", buySlug)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
+          const variants = data.variants as ProductVariant[];
+          const variant = variants.find((v) => v.size === buySize) ?? variants[0];
           setBuyNowItem({
             slug: data.slug,
             title: data.title,
             image: data.image300,
-            priceGbp: firstGbpAmount(data.price),
-            size: buySize,
+            price: variant?.price ?? 0,
+            size: variant?.size ?? "",
             qty: 1,
           });
         }
@@ -134,14 +137,14 @@ function CheckoutContent() {
   }, [buySlug, buySize]);
 
   const items = buySlug ? (buyNowItem ? [buyNowItem] : []) : cartItems;
-  const subtotal = items.reduce((sum, i) => sum + i.priceGbp * i.qty, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!payment) return;
     const data = new FormData(e.currentTarget);
     const priceOf = (i: CartItem) =>
-      rates ? formatGbpAmount(i.priceGbp * i.qty, rates) : `£${(i.priceGbp * i.qty).toFixed(2)}`;
+      rates ? formatUsdAmount(i.price * i.qty, rates) : `$${(i.price * i.qty).toFixed(2)}`;
     const lines = items
       .map((i) => `- ${i.title}${i.size ? ` (${i.size})` : ""} x${i.qty} — ${priceOf(i)}`)
       .join("\n");
@@ -155,7 +158,7 @@ function CheckoutContent() {
       "Items:",
       lines,
       "",
-      `Total: ${rates ? formatGbpAmount(subtotal, rates) : `£${subtotal.toFixed(2)}`}`,
+      `Total: ${rates ? formatUsdAmount(subtotal, rates) : `$${subtotal.toFixed(2)}`}`,
     ].join("\n");
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
     setSubmitted(true);
@@ -207,7 +210,7 @@ function CheckoutContent() {
               </p>
             </div>
             <p className="text-sm font-semibold text-neutral-700">
-              {rates ? formatGbpAmount(item.priceGbp * item.qty, rates) : `£${(item.priceGbp * item.qty).toFixed(2)}`}
+              {rates ? formatUsdAmount(item.price * item.qty, rates) : `$${(item.price * item.qty).toFixed(2)}`}
             </p>
             <button
               type="button"
@@ -222,7 +225,7 @@ function CheckoutContent() {
 
       <div className="mt-4 flex items-center justify-between rounded-lg border border-neutral-200 bg-white p-4">
         <p className="font-semibold text-neutral-900">Total</p>
-        <p className="font-semibold text-[#1b6b80]">{rates ? formatGbpAmount(subtotal, rates) : `£${subtotal.toFixed(2)}`}</p>
+        <p className="font-semibold text-[#1b6b80]">{rates ? formatUsdAmount(subtotal, rates) : `$${subtotal.toFixed(2)}`}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-lg border border-neutral-200 bg-white p-6">

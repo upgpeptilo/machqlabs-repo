@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getProducts } from "@/lib/products";
+import { getProducts, priceRange } from "@/lib/products";
 import { deleteProduct } from "../../actions";
 
 export const metadata = { title: "All Products – Admin" };
@@ -24,7 +24,7 @@ export default async function AllProductsPage() {
             />
             <div className="flex-1">
               <p className="font-semibold text-neutral-900">{product.title}</p>
-              <p className="text-sm text-neutral-500">{product.price}</p>
+              <p className="text-sm text-neutral-500">{priceRange(product.variants)}</p>
             </div>
             <Link href={`/admin/products/${product.id}/edit`} className="text-sm text-[#1b6b80] underline">
               Edit

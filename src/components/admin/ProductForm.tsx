@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import ImageUploader from "./ImageUploader";
-import type { Product, ProductSpec } from "@/lib/products";
-import { withOtherCurrencies, type GbpRates } from "@/lib/currency";
+import type { Product, ProductSpec, ProductVariant } from "@/lib/products";
+import { formatUsdAmount, type UsdRates } from "@/lib/currency";
 
 const KNOWN_SPECS = ["CAS Number", "Molecular Formula", "Molecular Weight", "Purity", "Peptide Sequence"];
 
@@ -22,13 +22,22 @@ export default function ProductForm({
   action: (formData: FormData) => void;
   submitLabel: string;
   cancelHref?: string;
-  rates: GbpRates;
+  rates: UsdRates;
 }) {
   const [extraSpecs, setExtraSpecs] = useState<ProductSpec[]>(
     () => product?.specs.filter((s) => !KNOWN_SPECS.includes(s.label)) ?? []
   );
-  const [priceInput, setPriceInput] = useState(product?.price ?? "");
-  const pricePreview = withOtherCurrencies(priceInput, rates);
+  const [variants, setVariants] = useState<ProductVariant[]>(
+    () => product?.variants ?? [{ size: "", price: 0 }]
+  );
+
+  function updateVariant(index: number, field: keyof ProductVariant, value: string) {
+    setVariants((prev) =>
+      prev.map((v, i) =>
+        i === index ? { ...v, [field]: field === "price" ? Number(value) || 0 : value } : v
+      )
+    );
+  }
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
@@ -64,38 +73,6 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-neutral-700" htmlFor="price">
-              Price
-            </label>
-            <input
-              id="price"
-              name="price"
-              type="text"
-              required
-              placeholder="£59.99 or £59.99 – £107.99"
-              value={priceInput}
-              onChange={(e) => setPriceInput(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
-            />
-            {pricePreview !== priceInput && (
-              <p className="mt-1 text-xs text-neutral-500">Shown to customers as: {pricePreview}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-neutral-700" htmlFor="sizes">
-              Sizes
-            </label>
-            <input
-              id="sizes"
-              name="sizes"
-              type="text"
-              placeholder="10MG, 20MG"
-              defaultValue={product?.sizes.join(", ")}
-              className="mt-1.5 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
-            />
-          </div>
-          <div>
             <label className="text-sm font-medium text-neutral-700" htmlFor="form">
               Form
             </label>
@@ -107,6 +84,61 @@ export default function ProductForm({
               className="mt-1.5 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
             />
           </div>
+        </div>
+
+        <div className="border-t border-neutral-200 pt-6">
+          <h3 className="font-semibold text-neutral-900">Sizes &amp; Pricing</h3>
+          <p className="mt-1 text-xs text-neutral-500">Sold as a pack of 10 vials. Set a price for each size.</p>
+
+          <div className="mt-4 space-y-3">
+            {variants.map((variant, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <div className="w-1/3">
+                  <input
+                    name="variantSize"
+                    type="text"
+                    required
+                    placeholder="10MG"
+                    value={variant.size}
+                    onChange={(e) => updateVariant(index, "size", e.target.value)}
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    name="variantPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    placeholder="59.99"
+                    value={variant.price || ""}
+                    onChange={(e) => updateVariant(index, "price", e.target.value)}
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
+                  />
+                  {variant.price > 0 && (
+                    <p className="mt-1 text-xs text-neutral-500">{formatUsdAmount(variant.price, rates)}</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVariants(variants.filter((_, i) => i !== index))}
+                  className="px-2 py-2.5 text-neutral-400 hover:text-red-600"
+                  aria-label="Remove size"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setVariants([...variants, { size: "", price: 0 }])}
+            className="mt-4 text-sm font-medium text-[#1b6b80] hover:underline"
+          >
+            + Add another size
+          </button>
         </div>
 
         <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">

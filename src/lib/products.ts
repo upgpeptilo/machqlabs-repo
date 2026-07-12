@@ -1,23 +1,33 @@
 import { createClient } from "@/lib/supabase/server";
-import { getGbpRates, withOtherCurrencies } from "@/lib/currency";
 
 export type ProductSpec = {
   label: string;
   value: string;
 };
 
+export type ProductVariant = {
+  size: string;
+  price: number;
+};
+
 export type Product = {
   id: string;
   slug: string;
   title: string;
-  price: string;
-  sizes: string[];
+  variants: ProductVariant[];
   form: string;
   image300: string;
   image600: string;
   bestSeller: boolean;
   specs: ProductSpec[];
 };
+
+export function priceRange(variants: ProductVariant[]) {
+  const prices = variants.map((v) => v.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min === max ? `$${min.toFixed(2)}` : `$${min.toFixed(2)} – $${max.toFixed(2)}`;
+}
 
 export const storageText =
   "Storage (Lyophilized): Store at -20°C in a dry, desiccated environment. – After Reconstitution: Store reconstituted peptide at 2–8°C and use within 30 days. For long-term storage, aliquot and freeze at -20°C. Avoid repeated freeze-thaw cycles. – Reconstitution: Reconstitute in sterile bacteriostatic water or appropriate buffer depending on experimental needs.";
@@ -29,8 +39,7 @@ type ProductRow = {
   id: string;
   slug: string;
   title: string;
-  price: string;
-  sizes: string[];
+  variants: ProductVariant[];
   form: string;
   image300: string;
   image600: string;
@@ -43,8 +52,7 @@ function mapRow(row: ProductRow): Product {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    price: row.price,
-    sizes: row.sizes,
+    variants: row.variants,
     form: row.form,
     image300: row.image300,
     image600: row.image600,
@@ -61,11 +69,7 @@ export async function getProducts(): Promise<Product[]> {
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  const rates = await getGbpRates();
-  return (data as ProductRow[]).map((row) => {
-    const product = mapRow(row);
-    return { ...product, price: withOtherCurrencies(product.price, rates) };
-  });
+  return (data as ProductRow[]).map(mapRow);
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
@@ -74,9 +78,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
 
   if (error) throw error;
   if (!data) return null;
-  const product = mapRow(data as ProductRow);
-  const rates = await getGbpRates();
-  return { ...product, price: withOtherCurrencies(product.price, rates) };
+  return mapRow(data as ProductRow);
 }
 
 export async function getBestSellers(): Promise<Product[]> {
