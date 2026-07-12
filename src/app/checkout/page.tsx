@@ -13,33 +13,12 @@ const WHATSAPP_NUMBER = "12033767244";
 type Option = { name: string; logo?: string; emoji?: string };
 
 const payLogo = (file: string) => `/images/payment/${encodeURIComponent(file)}`;
-const bankLogo = (file: string) => `/images/banks/${encodeURIComponent(file)}`;
 
 const PAYMENT_METHODS: Option[] = [
-  { name: "Bank Transfer", emoji: "🏦" },
-  { name: "ACH", logo: payLogo("ACH.png") },
   { name: "Visa Card", logo: payLogo("Cards.png") },
-  { name: "Venmo", logo: payLogo("Venmo.png") },
-  { name: "Chime", logo: payLogo("Chime.png") },
-  { name: "PayPal", logo: payLogo("Paypal.png") },
   { name: "Cryptocurrency", logo: payLogo("Bitcoin.png") },
-  { name: "Apple Pay", logo: payLogo("ApplePay.png") },
-  { name: "Google Pay", logo: payLogo("Google Pay.png") },
-  { name: "Gift Card", logo: payLogo("Cards.png") },
   { name: "Cash App", logo: payLogo("Cash App.png") },
-  { name: "e-Transfer", logo: payLogo("e-Transfer.png") },
   { name: "Zelle", logo: payLogo("zelle.png") },
-];
-
-const BANKS: Option[] = [
-  { name: "Barclays", logo: bankLogo("Barclays.png") },
-  { name: "BNP Paribas", logo: bankLogo("BNP Paribas.png") },
-  { name: "Credit Agricole", logo: bankLogo("Credit Agricole.png") },
-  { name: "HSBC Holdings", logo: bankLogo("HSBC Holdings.png") },
-  { name: "Lloyds Bank", logo: bankLogo("Lloyds Bank.png") },
-  { name: "Santander", logo: bankLogo("Santander.png") },
-  { name: "Societe Generale", logo: bankLogo("Societe Generale.png") },
-  { name: "UBS Group AG", logo: bankLogo("UBS Group AG.png") },
 ];
 
 function OptionDropdown({
@@ -126,7 +105,6 @@ function CheckoutContent() {
   const [rates, setRates] = useState<GbpRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [payment, setPayment] = useState("");
-  const [bank, setBank] = useState("");
 
   useEffect(() => {
     getGbpRates().then(setRates);
@@ -160,7 +138,7 @@ function CheckoutContent() {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!payment || (payment === "Bank Transfer" && !bank)) return;
+    if (!payment) return;
     const data = new FormData(e.currentTarget);
     const priceOf = (i: CartItem) =>
       rates ? formatGbpAmount(i.priceGbp * i.qty, rates) : `£${(i.priceGbp * i.qty).toFixed(2)}`;
@@ -172,7 +150,7 @@ function CheckoutContent() {
       `Name: ${data.get("name")}`,
       `Email: ${data.get("email")}`,
       `Address: ${data.get("address")}`,
-      `Payment Method: ${payment}${payment === "Bank Transfer" ? ` (${bank})` : ""}`,
+      `Payment Method: ${payment}`,
       "",
       "Items:",
       lines,
@@ -265,14 +243,8 @@ function CheckoutContent() {
           label="Payment Method"
           options={PAYMENT_METHODS}
           value={payment}
-          onChange={(name) => {
-            setPayment(name);
-            if (name !== "Bank Transfer") setBank("");
-          }}
+          onChange={setPayment}
         />
-        {payment === "Bank Transfer" && (
-          <OptionDropdown label="Order Banks" options={BANKS} value={bank} onChange={setBank} />
-        )}
         <p className="text-xs text-neutral-500">Placing your order opens WhatsApp with your order details — hit Send to confirm with us.</p>
         <button type="submit" className="w-full rounded bg-[#6b3fd4] py-3 font-semibold text-white hover:bg-[#5c33bd]">
           Place Order
