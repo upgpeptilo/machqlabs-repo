@@ -20,6 +20,7 @@ const PAYMENT_METHODS: Option[] = [
   { name: "Cryptocurrency", logo: payLogo("Bitcoin.png") },
   { name: "Cash App", logo: payLogo("Cash App.png") },
   { name: "Zelle", logo: payLogo("zelle.png") },
+  { name: "Bank Transfer", logo: payLogo("BankTransfer.png") },
 ];
 
 function OptionDropdown({
