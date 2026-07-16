@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import FaqAccordion from "@/components/FaqAccordion";
+import Reviews from "@/components/Reviews";
 import { getBestSellers } from "@/lib/products";
 
 const valueProps = [
@@ -96,6 +97,8 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      <Reviews limit={6} />
 
       <section className="bg-[#1b6b80] px-4 py-16">
         <div className="mx-auto max-w-3xl">
