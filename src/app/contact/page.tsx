@@ -8,6 +8,7 @@ export default function ContactPage() {
         Fill in the form below or email support@machqlabs.com, a member of the team will be in
         touch shortly.
       </p>
+      <p className="mt-1 text-sm text-neutral-400">Chantilly, VA</p>
 
       <form className="mt-8 space-y-4">
         <div>

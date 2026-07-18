@@ -15,8 +15,8 @@ const valueProps = [
     body: "Clear communication and dependable support throughout the ordering process.",
   },
   {
-    title: "Secure UK Fulfilment",
-    body: "Carefully packaged orders shipped promptly within the UK.",
+    title: "Secure US Fulfilment",
+    body: "Carefully packaged orders shipped promptly within the US.",
   },
 ];
 
@@ -30,8 +30,8 @@ const faqs = [
     a: "Packaging may differ between batches. The contents of each bottle are verified through independent third-party testing to ensure quality standards are met.",
   },
   {
-    q: "Do you ship outside of UK?",
-    a: "We currently only ship to UK Mainland and Northern Ireland. Apologies for any inconvenience.",
+    q: "Do you ship outside of the US?",
+    a: "We currently only ship within the United States. Apologies for any inconvenience.",
   },
   {
     q: "Do you provide Certificate of Analysis (CoA)'s with your products?",

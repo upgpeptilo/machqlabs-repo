@@ -51,7 +51,8 @@ export default function Footer() {
           <p>MachQ Labs. For research purposes.</p>
           <p>
             MachQLabs is the trading name of CLIENTMACH LTD, a company registered in England &amp; Wales under
-            company number 15764475 and whose registered address is 67 Hough Lane, Leyland, England PR25 2SA
+            company number 15764475 and whose registered address is 4410 Brookfield Corporate Dr #223983,
+            Chantilly, VA 20151
           </p>
           <p>support@machqlabs.com · VAT Number GB516977157</p>
           <p>© {new Date().getFullYear()} MachQ Labs. All Rights Reserved.</p>
