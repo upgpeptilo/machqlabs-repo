@@ -2,6 +2,9 @@ const FALLBACK_RATES = { EUR: 0.92, GBP: 0.79 };
 const TTL_MS = 60 * 60 * 1000;
 
 export type UsdRates = { EUR: number; GBP: number };
+export type Currency = "USD" | "EUR" | "GBP";
+
+const SYMBOLS: Record<Currency, string> = { USD: "$", EUR: "€", GBP: "£" };
 
 let cached: { rates: UsdRates; ts: number } | null = null;
 
@@ -26,4 +29,9 @@ export async function getUsdRates(): Promise<UsdRates> {
 
 export function formatUsdAmount(amount: number, rates: UsdRates): string {
   return `$${amount.toFixed(2)} / €${(amount * rates.EUR).toFixed(2)} / £${(amount * rates.GBP).toFixed(2)}`;
+}
+
+export function formatAmount(amount: number, currency: Currency, rates: UsdRates): string {
+  const converted = currency === "USD" ? amount : amount * rates[currency];
+  return `${SYMBOLS[currency]}${converted.toFixed(2)}`;
 }

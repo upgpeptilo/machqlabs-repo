@@ -5,6 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import FloatingActions from "./FloatingActions";
 import { CartProvider } from "@/lib/cart";
+import { CurrencyProvider } from "@/lib/currency-context";
 
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,11 +14,13 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   if (isAdmin) return <main className="flex-1">{children}</main>;
 
   return (
-    <CartProvider>
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-      <FloatingActions />
-    </CartProvider>
+    <CurrencyProvider>
+      <CartProvider>
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <FloatingActions />
+      </CartProvider>
+    </CurrencyProvider>
   );
 }

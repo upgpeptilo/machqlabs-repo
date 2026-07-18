@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
-import { formatUsdAmount, getUsdRates, type UsdRates } from "@/lib/currency";
+import { formatAmount, getUsdRates, type UsdRates } from "@/lib/currency";
+import { useCurrency } from "@/lib/currency-context";
 
 export default function BasketPage() {
   const { items, removeItem, setQty } = useCart();
+  const { currency } = useCurrency();
   const [rates, setRates] = useState<UsdRates | null>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function BasketPage() {
             <div className="flex-1">
               <p className="font-semibold text-neutral-900">{item.title}</p>
               <p className="text-sm text-neutral-500">Size: {item.size}</p>
-              <p className="text-sm text-neutral-500">{rates ? formatUsdAmount(item.price, rates) : `$${item.price.toFixed(2)}`}</p>
+              <p className="text-sm text-neutral-500">{rates ? formatAmount(item.price, currency, rates) : `$${item.price.toFixed(2)}`}</p>
             </div>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => setQty(item.slug, item.size, item.qty - 1)} className="h-8 w-8 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50">
@@ -59,7 +61,7 @@ export default function BasketPage() {
 
       <div className="mt-6 flex items-center justify-between rounded-lg border border-neutral-200 bg-white p-4">
         <p className="font-semibold text-neutral-900">Subtotal</p>
-        <p className="font-semibold text-[#1b6b80]">{rates ? formatUsdAmount(subtotal, rates) : `$${subtotal.toFixed(2)}`}</p>
+        <p className="font-semibold text-[#1b6b80]">{rates ? formatAmount(subtotal, currency, rates) : `$${subtotal.toFixed(2)}`}</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
