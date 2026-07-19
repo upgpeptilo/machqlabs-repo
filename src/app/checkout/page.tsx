@@ -11,6 +11,7 @@ import { useCurrency } from "@/lib/currency-context";
 import type { ProductVariant } from "@/lib/products";
 
 const WHATSAPP_NUMBER = "12033767244";
+const EMAIL_ADDRESS = "office@machqlab.com";
 
 type Option = { name: string; logo?: string; emoji?: string };
 
@@ -109,6 +110,7 @@ function CheckoutContent() {
   const [rates, setRates] = useState<UsdRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [payment, setPayment] = useState("");
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
   useEffect(() => {
     getUsdRates().then(setRates);
@@ -164,7 +166,19 @@ function CheckoutContent() {
       "",
       `Total: ${rates ? formatAmount(subtotal, currency, rates) : `$${subtotal.toFixed(2)}`}`,
     ].join("\n");
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
+    setPendingMessage(message);
+  }
+
+  function confirmViaWhatsapp() {
+    if (!pendingMessage) return;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(pendingMessage)}`, "_blank");
+    setSubmitted(true);
+    if (!buySlug) clear();
+  }
+
+  function confirmViaEmail() {
+    if (!pendingMessage) return;
+    window.open(`mailto:${EMAIL_ADDRESS}?subject=${encodeURIComponent("New Order")}&body=${encodeURIComponent(pendingMessage)}`, "_blank");
     setSubmitted(true);
     if (!buySlug) clear();
   }
@@ -174,7 +188,7 @@ function CheckoutContent() {
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1b6b80]">Order Received</h1>
         <p className="mt-3 text-neutral-600">
-          Thanks for your order. If a WhatsApp tab didn&apos;t open, message us directly to confirm payment and shipping details.
+          Thanks for your order. If a WhatsApp or email tab didn&apos;t open, contact us directly to confirm payment and shipping details.
         </p>
         <Link href="/products" className="mt-6 inline-block rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]">
           Continue Shopping
@@ -289,6 +303,39 @@ function CheckoutContent() {
           Place Order
         </button>
       </form>
+
+      {pendingMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center">
+            <h2 className="text-lg font-bold text-[#1b6b80]">How would you like to confirm your order?</h2>
+            <p className="mt-2 text-sm text-neutral-600">We reply within minutes.</p>
+            <p className="mt-1 text-xs text-neutral-500">Email opens a draft in your mail app — press Send there to reach us.</p>
+            <div className="mt-4 space-y-2">
+              <button
+                type="button"
+                onClick={confirmViaWhatsapp}
+                className="w-full rounded bg-[#25D366] py-2.5 font-semibold text-white hover:bg-[#1ebe57]"
+              >
+                Checkout with WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={confirmViaEmail}
+                className="w-full rounded bg-[#1b6b80] py-2.5 font-semibold text-white hover:bg-[#164f5f]"
+              >
+                Checkout with Email
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingMessage(null)}
+              className="mt-3 text-sm text-neutral-500 underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
