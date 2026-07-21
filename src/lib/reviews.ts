@@ -22,7 +22,7 @@ export const reviews: Review[] = [
   },
   {
     name: "Michael Neitte",
-    body: "I recently tried out a pharmacy in the UK that offers delivery, and I have to say, it was a great experience. The ordering process was straightforward, and I was pleasantly surprised by how quickly my items arrived at my doorstep. The delivery person was friendly and made sure everything was handed over safely.",
+    body: "I recently tried out a pharmacy in the US that offers delivery, and I have to say, it was a great experience. The ordering process was straightforward, and I was pleasantly surprised by how quickly my items arrived at my doorstep. The delivery person was friendly and made sure everything was handed over safely.",
     rating: 4,
   },
   {
@@ -32,7 +32,7 @@ export const reviews: Review[] = [
   },
   {
     name: "Jason Hess",
-    body: "I recently had the opportunity to use a 24/7 pharmacy in the UK that offers delivery services, and I can't recommend them enough! It was late one night when I realized I was out of my regular medication, and I wasn't sure what to do. After a quick search, I found this pharmacy that operates around the clock. I was pleasantly surprised at how easy it was to place my order online.",
+    body: "I recently had the opportunity to use a 24/7 pharmacy in the US that offers delivery services, and I can't recommend them enough! It was late one night when I realized I was out of my regular medication, and I wasn't sure what to do. After a quick search, I found this pharmacy that operates around the clock. I was pleasantly surprised at how easy it was to place my order online.",
     rating: 4.5,
   },
   {
@@ -52,7 +52,7 @@ export const reviews: Review[] = [
   },
   {
     name: "Denis Buch",
-    body: "I've been using this local UK pharmacy for my medication needs, and I can't recommend them enough! Their 24/7 delivery service is a lifesaver, especially when I run out of essentials late at night. Plus, their prices are pretty reasonable compared to other pharmacies, which is a nice bonus.",
+    body: "I've been using this local US pharmacy for my medication needs, and I can't recommend them enough! Their 24/7 delivery service is a lifesaver, especially when I run out of essentials late at night. Plus, their prices are pretty reasonable compared to other pharmacies, which is a nice bonus.",
     rating: 5,
   },
 ];
