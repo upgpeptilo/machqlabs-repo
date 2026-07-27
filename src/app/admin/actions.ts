@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function slugify(title: string) {
   return title
@@ -133,7 +134,13 @@ export async function subscribeToPush(subscription: {
   keys: { p256dh: string; auth: string };
 }) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const adminSupabase = createAdminClient();
+  const { error } = await adminSupabase
     .from("push_subscriptions")
     .upsert(
       { endpoint: subscription.endpoint, p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
