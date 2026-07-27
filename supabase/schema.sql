@@ -138,3 +138,30 @@ create policy "Authenticated users can delete orders"
   on orders for delete
   to authenticated
   using (true);
+
+-- push subscriptions for admin web push notifications
+create table if not exists push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table push_subscriptions enable row level security;
+
+grant insert, delete on push_subscriptions to authenticated;
+
+drop policy if exists "Authenticated users can insert their push subscription" on push_subscriptions;
+create policy "Authenticated users can insert their push subscription"
+  on push_subscriptions for insert
+  to authenticated
+  with check (true);
+
+drop policy if exists "Authenticated users can delete push subscriptions" on push_subscriptions;
+create policy "Authenticated users can delete push subscriptions"
+  on push_subscriptions for delete
+  to authenticated
+  using (true);
+
+-- no select policy: only the service-role webhook route reads this table, bypassing RLS
