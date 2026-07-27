@@ -87,3 +87,54 @@ insert into products (slug, title, variants, form, image300, image600, best_sell
 ('tesamorelin', 'Tesamorelin', '[{"size":"10MG","price":59.99},{"size":"20MG","price":107.99}]', 'Lyophilized Powder', '/images/tesamorelin-300.png', '/images/tesamorelin-600.png', true,
   '[{"label":"CAS Number","value":"901758-09-6"},{"label":"Molecular Formula","value":"C223H370N72O69S"},{"label":"Molecular Weight","value":"~5135.9 g/mol"},{"label":"Purity","value":"≥99%"},{"label":"Peptide Sequence","value":"YADAIFTNSYRKVLGQLSARKLLQDIMSRQQGESNQERGARARL"}]')
 on conflict (slug) do nothing;
+
+-- orders placed at checkout
+create table if not exists orders (
+  id uuid primary key default gen_random_uuid(),
+  order_number bigint generated always as identity,
+  name text not null,
+  email text not null,
+  address text not null,
+  payment_method text not null,
+  currency text not null,
+  items jsonb not null,
+  total numeric(10,2) not null,
+  status text not null default 'pending',
+  created_at timestamptz not null default now()
+);
+
+alter table orders enable row level security;
+
+-- RLS policies only apply on top of base grants — without these, anon/authenticated
+-- have no underlying privilege on this table and every query 42501s regardless of policy
+grant insert on orders to anon, authenticated;
+grant select, update on orders to authenticated;
+
+-- anyone can place an order, insert-only — anon (real customers) and authenticated
+-- (a logged-in admin testing checkout) both need it, else the admin session 42501s
+drop policy if exists "Public can insert orders" on orders;
+create policy "Public can insert orders"
+  on orders for insert
+  to anon, authenticated
+  with check (true);
+
+-- only logged-in users (admins) can view/update orders
+drop policy if exists "Authenticated users can view orders" on orders;
+create policy "Authenticated users can view orders"
+  on orders for select
+  to authenticated
+  using (true);
+
+drop policy if exists "Authenticated users can update orders" on orders;
+create policy "Authenticated users can update orders"
+  on orders for update
+  to authenticated
+  using (true);
+
+grant delete on orders to authenticated;
+
+drop policy if exists "Authenticated users can delete orders" on orders;
+create policy "Authenticated users can delete orders"
+  on orders for delete
+  to authenticated
+  using (true);

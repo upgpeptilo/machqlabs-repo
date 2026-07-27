@@ -6,12 +6,14 @@ import { signOut } from "@/app/admin/actions";
 
 const links = [
   { href: "/admin", label: "Home" },
+  { href: "/admin/orders", label: "Orders" },
   { href: "/admin/products/new", label: "Add Product" },
   { href: "/admin/products", label: "All Products" },
 ];
 
 function isActive(pathname: string, href: string) {
   if (href === "/admin") return pathname === "/admin";
+  if (href === "/admin/orders") return pathname.startsWith("/admin/orders");
   if (href === "/admin/products/new") return pathname === "/admin/products/new";
   return pathname === "/admin/products" || pathname.startsWith("/admin/products/") && !pathname.startsWith("/admin/products/new");
 }

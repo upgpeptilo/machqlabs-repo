@@ -9,9 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatAmount, getUsdRates, type UsdRates } from "@/lib/currency";
 import { useCurrency } from "@/lib/currency-context";
 import type { ProductVariant } from "@/lib/products";
-
-const WHATSAPP_NUMBER = "12033767244";
-const EMAIL_ADDRESS = "office@machqlab.com";
+import { placeOrder } from "./actions";
 
 type Option = { name: string; logo?: string; emoji?: string };
 
@@ -110,7 +108,8 @@ function CheckoutContent() {
   const [rates, setRates] = useState<UsdRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [payment, setPayment] = useState("");
-  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<number | null>(null);
 
   useEffect(() => {
     getUsdRates().then(setRates);
@@ -144,43 +143,28 @@ function CheckoutContent() {
   const items = buySlug ? (buyNowItem ? [buyNowItem] : []) : cartItems;
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!payment) return;
+    if (!payment || submitting) return;
     const data = new FormData(e.currentTarget);
-    const priceOf = (i: CartItem) =>
-      rates ? formatAmount(i.price * i.qty, currency, rates) : `$${(i.price * i.qty).toFixed(2)}`;
-    const lines = items
-      .map((i) => `- ${i.title}${i.size ? ` (${i.size})` : ""} x${i.qty} — ${priceOf(i)}`)
-      .join("\n");
-    const message = [
-      "New Order",
-      `Name: ${data.get("name")}`,
-      `Email: ${data.get("email")}`,
-      `Address: ${data.get("address")}`,
-      `Payment Method: ${payment}`,
-      `Currency: ${currency}`,
-      "",
-      "Items:",
-      lines,
-      "",
-      `Total: ${rates ? formatAmount(subtotal, currency, rates) : `$${subtotal.toFixed(2)}`}`,
-    ].join("\n");
-    setPendingMessage(message);
-  }
-
-  function confirmViaWhatsapp() {
-    if (!pendingMessage) return;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(pendingMessage)}`, "_blank");
-    setSubmitted(true);
-    if (!buySlug) clear();
-  }
-
-  function confirmViaEmail() {
-    if (!pendingMessage) return;
-    window.open(`mailto:${EMAIL_ADDRESS}?subject=${encodeURIComponent("New Order")}&body=${encodeURIComponent(pendingMessage)}`, "_blank");
-    setSubmitted(true);
-    if (!buySlug) clear();
+    setSubmitting(true);
+    try {
+      const number = await placeOrder({
+        name: String(data.get("name")),
+        email: String(data.get("email")),
+        address: String(data.get("address")),
+        paymentMethod: payment,
+        currency,
+        items,
+        total: subtotal,
+      });
+      setOrderNumber(number);
+      setSubmitted(true);
+      if (!buySlug) clear();
+    } catch {
+      setSubmitting(false);
+      alert("Something went wrong placing your order. Please try again.");
+    }
   }
 
   if (submitted) {
@@ -188,8 +172,19 @@ function CheckoutContent() {
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1b6b80]">Order Received</h1>
         <p className="mt-3 text-neutral-600">
-          Thanks for your order. If a WhatsApp or email tab didn&apos;t open, contact us directly to confirm payment and shipping details.
+          Your order number is{" "}
+          <span className="font-semibold text-neutral-900">
+            ORD-{String(orderNumber).padStart(4, "0")}
+          </span>
+          .
+          We&apos;ll email you at the address you provided to confirm payment and shipping.
         </p>
+        <div className="mt-6 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-left text-sm text-neutral-600">
+          <p className="font-semibold text-neutral-900">What happens next?</p>
+          <p>1. Our team reviews your order, usually within 24 hours.</p>
+          <p>2. We&apos;ll email you to confirm payment details and finalize your order.</p>
+          <p>3. Once payment is confirmed, your order is processed and shipped.</p>
+        </div>
         <Link href="/products" className="mt-6 inline-block rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]">
           Continue Shopping
         </Link>
@@ -298,44 +293,15 @@ function CheckoutContent() {
           value={payment}
           onChange={setPayment}
         />
-        <p className="text-xs text-neutral-500">Placing your order opens WhatsApp with your order details — hit Send to confirm with us.</p>
-        <button type="submit" className="w-full rounded bg-[#6b3fd4] py-3 font-semibold text-white hover:bg-[#5c33bd]">
-          Place Order
+        <p className="text-xs text-neutral-500">We&apos;ll email you to confirm payment and shipping after you place your order.</p>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full rounded bg-[#6b3fd4] py-3 font-semibold text-white hover:bg-[#5c33bd] disabled:opacity-60"
+        >
+          {submitting ? "Placing Order…" : "Place Order"}
         </button>
       </form>
-
-      {pendingMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center">
-            <h2 className="text-lg font-bold text-[#1b6b80]">How would you like to confirm your order?</h2>
-            <p className="mt-2 text-sm text-neutral-600">We reply within minutes.</p>
-            <p className="mt-1 text-xs text-neutral-500">Email opens a draft in your mail app — press Send there to reach us.</p>
-            <div className="mt-4 space-y-2">
-              <button
-                type="button"
-                onClick={confirmViaWhatsapp}
-                className="w-full rounded bg-[#25D366] py-2.5 font-semibold text-white hover:bg-[#1ebe57]"
-              >
-                Checkout with WhatsApp
-              </button>
-              <button
-                type="button"
-                onClick={confirmViaEmail}
-                className="w-full rounded bg-[#1b6b80] py-2.5 font-semibold text-white hover:bg-[#164f5f]"
-              >
-                Checkout with Email
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => setPendingMessage(null)}
-              className="mt-3 text-sm text-neutral-500 underline"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
