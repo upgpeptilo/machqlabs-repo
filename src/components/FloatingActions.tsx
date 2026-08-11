@@ -8,7 +8,7 @@ export default function FloatingActions() {
   const count = items.reduce((sum, i) => sum + i.qty, 0);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-3">
       <Link
         href="/basket"
         aria-label="View basket"
