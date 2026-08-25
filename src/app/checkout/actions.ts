@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { CartItem } from "@/lib/cart";
 
 export async function placeOrder(order: {
@@ -12,7 +12,7 @@ export async function placeOrder(order: {
   items: CartItem[];
   total: number;
 }) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("orders")
     .insert({
