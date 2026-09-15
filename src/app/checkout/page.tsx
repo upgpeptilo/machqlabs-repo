@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatAmount, getUsdRates, type UsdRates } from "@/lib/currency";
 import { useCurrency } from "@/lib/currency-context";
 import type { ProductVariant } from "@/lib/products";
+import { buildOrderWhatsappMessage, buildWhatsappLink } from "@/lib/whatsapp";
 import { placeOrder } from "./actions";
 
 type Option = { name: string; logo?: string; emoji?: string };
@@ -110,9 +111,26 @@ function CheckoutContent() {
   const [payment, setPayment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [confirmedOrder, setConfirmedOrder] = useState<{
+    name: string;
+    items: CartItem[];
+    total: number;
+    currency: string;
+  } | null>(null);
 
   useEffect(() => {
     getUsdRates().then(setRates);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "whatsapp_number")
+      .maybeSingle()
+      .then(({ data }) => setWhatsappNumber(data?.value ?? ""));
   }, []);
 
   useEffect(() => {
@@ -147,11 +165,14 @@ function CheckoutContent() {
     e.preventDefault();
     if (!payment || submitting) return;
     const data = new FormData(e.currentTarget);
+    const name = String(data.get("name"));
+    const phone = String(data.get("phone") ?? "");
     setSubmitting(true);
     try {
       const number = await placeOrder({
-        name: String(data.get("name")),
+        name,
         email: String(data.get("email")),
+        phone,
         address: String(data.get("address")),
         paymentMethod: payment,
         currency,
@@ -159,6 +180,7 @@ function CheckoutContent() {
         total: subtotal,
       });
       setOrderNumber(number);
+      setConfirmedOrder({ name, items, total: subtotal, currency });
       setSubmitted(true);
       if (!buySlug) clear();
     } catch {
@@ -185,9 +207,24 @@ function CheckoutContent() {
           <p>2. We&apos;ll email you to confirm payment details and finalize your order.</p>
           <p>3. Once payment is confirmed, your order is processed and shipped.</p>
         </div>
-        <Link href="/products" className="mt-6 inline-block rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]">
-          Continue Shopping
-        </Link>
+        {whatsappNumber && confirmedOrder && orderNumber && (
+          <a
+            href={buildWhatsappLink(
+              whatsappNumber,
+              buildOrderWhatsappMessage({ orderNumber, ...confirmedOrder })
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded bg-[#25D366] px-5 py-2.5 font-semibold text-white hover:bg-[#1ebe5b]"
+          >
+            Confirm Order on WhatsApp
+          </a>
+        )}
+        <div>
+          <Link href="/products" className="mt-6 inline-block rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]">
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     );
   }
@@ -282,6 +319,10 @@ function CheckoutContent() {
         <div>
           <label className="text-sm font-medium text-neutral-700" htmlFor="email">Email</label>
           <input id="email" name="email" type="email" required className="mt-1.5 w-full rounded-lg border border-neutral-300 px-3 py-2.5 focus:border-[#1b6b80] focus:outline-none" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-neutral-700" htmlFor="phone">Phone / WhatsApp Number (optional)</label>
+          <input id="phone" name="phone" type="tel" placeholder="e.g. +1 555 123 4567" className="mt-1.5 w-full rounded-lg border border-neutral-300 px-3 py-2.5 focus:border-[#1b6b80] focus:outline-none" />
         </div>
         <div>
           <label className="text-sm font-medium text-neutral-700" htmlFor="address">Shipping Address</label>
