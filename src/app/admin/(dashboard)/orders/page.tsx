@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import StatusSelect from "@/components/admin/StatusSelect";
 import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
+import { buildWhatsappLink } from "@/lib/whatsapp";
 
 export const metadata = { title: "Orders – Admin" };
 
@@ -36,6 +37,22 @@ export default async function OrdersPage() {
             <div className="space-y-1 border-t border-neutral-100 p-4 pt-3 text-sm text-neutral-600">
               <p>Address: {order.address}</p>
               <p>Payment: {order.payment_method}</p>
+              {order.phone && (
+                <p className="flex flex-wrap items-center gap-2">
+                  <span>Phone: {order.phone}</span>
+                  <a
+                    href={buildWhatsappLink(
+                      order.phone,
+                      `Hi ${order.name}, this is MachQ Labs regarding your order ORD-${String(order.order_number).padStart(4, "0")}.`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full bg-[#25D366]/10 px-2.5 py-1 text-xs font-semibold text-[#128C4A] hover:bg-[#25D366]/20"
+                  >
+                    Message on WhatsApp
+                  </a>
+                </p>
+              )}
               <ul className="list-disc pl-5">
                 {(order.items as OrderItem[]).map((item, idx) => (
                   <li key={idx}>

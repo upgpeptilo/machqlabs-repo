@@ -149,6 +149,20 @@ export async function subscribeToPush(subscription: {
   if (error) throw error;
 }
 
+export async function updateWhatsappNumber(formData: FormData) {
+  const value = String(formData.get("whatsappNumber") ?? "").trim();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("settings")
+    .upsert({ key: "whatsapp_number", value, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  if (error) throw error;
+
+  // "layout" so the floating WhatsApp button (rendered from the root layout) picks up the change everywhere
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/settings");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
