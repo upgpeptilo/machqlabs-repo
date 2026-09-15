@@ -8,7 +8,13 @@ import FloatingActions from "./FloatingActions";
 import { CartProvider } from "@/lib/cart";
 import { CurrencyProvider } from "@/lib/currency-context";
 
-export default function SiteChrome({ children }: { children: React.ReactNode }) {
+export default function SiteChrome({
+  children,
+  whatsappNumber,
+}: {
+  children: React.ReactNode;
+  whatsappNumber?: string;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
 
@@ -20,7 +26,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        <FloatingActions />
+        <FloatingActions whatsappNumber={whatsappNumber} />
         <Script
           id="jivo-chat"
           src="//code.jivosite.com/widget/rSxak4sIkA"
