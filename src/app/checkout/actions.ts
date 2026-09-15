@@ -6,6 +6,7 @@ import type { CartItem } from "@/lib/cart";
 export async function placeOrder(order: {
   name: string;
   email: string;
+  phone?: string;
   address: string;
   paymentMethod: string;
   currency: string;
@@ -18,6 +19,7 @@ export async function placeOrder(order: {
     .insert({
       name: order.name,
       email: order.email,
+      phone: order.phone ?? "",
       address: order.address,
       payment_method: order.paymentMethod,
       currency: order.currency,
