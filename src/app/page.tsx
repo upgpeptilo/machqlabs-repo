@@ -15,8 +15,8 @@ const valueProps = [
     body: "Clear communication and dependable support throughout the ordering process.",
   },
   {
-    title: "Secure US Fulfilment",
-    body: "Carefully packaged orders shipped promptly within the US.",
+    title: "Secure Worldwide Fulfilment",
+    body: "Carefully packaged orders shipped promptly worldwide.",
   },
 ];
 
