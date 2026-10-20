@@ -6,7 +6,6 @@ import Header from "./Header";
 import Footer from "./Footer";
 import FloatingActions from "./FloatingActions";
 import { CartProvider } from "@/lib/cart";
-import { CurrencyProvider } from "@/lib/currency-context";
 
 export default function SiteChrome({
   children,
@@ -21,18 +20,16 @@ export default function SiteChrome({
   if (isAdmin) return <main className="flex-1">{children}</main>;
 
   return (
-    <CurrencyProvider>
-      <CartProvider>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <FloatingActions whatsappNumber={whatsappNumber} />
-        <Script
-          id="jivo-chat"
-          src="//code.jivosite.com/widget/rSxak4sIkA"
-          strategy="afterInteractive"
-        />
-      </CartProvider>
-    </CurrencyProvider>
+    <CartProvider>
+      <Header />
+      <main className="flex-1">{children}</main>
+      <Footer />
+      <FloatingActions whatsappNumber={whatsappNumber} />
+      <Script
+        id="jivo-chat"
+        src="//code.jivosite.com/widget/rSxak4sIkA"
+        strategy="afterInteractive"
+      />
+    </CartProvider>
   );
 }

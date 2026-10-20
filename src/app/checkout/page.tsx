@@ -6,8 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart, type CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
-import { formatAmount, getUsdRates, type UsdRates } from "@/lib/currency";
-import { useCurrency } from "@/lib/currency-context";
+import { formatAmount } from "@/lib/currency";
 import type { ProductVariant } from "@/lib/products";
 import { buildOrderWhatsappMessage, buildWhatsappLink } from "@/lib/whatsapp";
 import { placeOrder } from "./actions";
@@ -102,11 +101,9 @@ function CheckoutContent() {
   const buySlug = searchParams.get("buy");
   const buySize = searchParams.get("size") ?? "";
   const { items: cartItems, removeItem, clear } = useCart();
-  const { currency, hasChosen, chooseCurrency } = useCurrency();
 
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
   const [loading, setLoading] = useState(!!buySlug);
-  const [rates, setRates] = useState<UsdRates | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [payment, setPayment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -116,12 +113,7 @@ function CheckoutContent() {
     name: string;
     items: CartItem[];
     total: number;
-    currency: string;
   } | null>(null);
-
-  useEffect(() => {
-    getUsdRates().then(setRates);
-  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -175,12 +167,11 @@ function CheckoutContent() {
         phone,
         address: String(data.get("address")),
         paymentMethod: payment,
-        currency,
         items,
         total: subtotal,
       });
       setOrderNumber(number);
-      setConfirmedOrder({ name, items, total: subtotal, currency });
+      setConfirmedOrder({ name, items, total: subtotal });
       setSubmitted(true);
       if (!buySlug) clear();
     } catch {
@@ -245,38 +236,6 @@ function CheckoutContent() {
     );
   }
 
-  if (!hasChosen) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-        <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center">
-          <h2 className="text-lg font-bold text-[#1b6b80]">Choose Your Currency</h2>
-          <p className="mt-2 text-sm text-neutral-600">You&apos;re about to buy:</p>
-          <ul className="mt-3 space-y-1 text-left text-sm text-neutral-700">
-            {items.map((item) => (
-              <li key={`${item.slug}-${item.size}`}>
-                {item.title}
-                {item.size && ` (${item.size})`} × {item.qty}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-sm text-neutral-600">Select the currency you&apos;d like to pay in:</p>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {(["USD", "EUR", "GBP"] as const).map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => chooseCurrency(c)}
-                className="rounded border border-neutral-300 py-2 font-semibold text-neutral-700 hover:border-[#1b6b80] hover:bg-[#eef7f9] hover:text-[#1b6b80]"
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
       <h1 className="text-2xl font-bold text-[#1b6b80]">Checkout</h1>
@@ -292,7 +251,7 @@ function CheckoutContent() {
               </p>
             </div>
             <p className="text-sm font-semibold text-neutral-700">
-              {rates ? formatAmount(item.price * item.qty, currency, rates) : `$${(item.price * item.qty).toFixed(2)}`}
+              {formatAmount(item.price * item.qty)}
             </p>
             <button
               type="button"
@@ -307,7 +266,7 @@ function CheckoutContent() {
 
       <div className="mt-4 flex items-center justify-between rounded-lg border border-neutral-200 bg-white p-4">
         <p className="font-semibold text-neutral-900">Total</p>
-        <p className="font-semibold text-[#1b6b80]">{rates ? formatAmount(subtotal, currency, rates) : `$${subtotal.toFixed(2)}`}</p>
+        <p className="font-semibold text-[#1b6b80]">{formatAmount(subtotal)}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-lg border border-neutral-200 bg-white p-6">

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, storageText, disclaimerText } from "@/lib/products";
-import { getUsdRates } from "@/lib/currency";
 import ProductActions from "@/components/ProductActions";
 import Reviews from "@/components/Reviews";
 
@@ -14,7 +13,6 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
-  const rates = await getUsdRates();
 
   return (
     <div>
@@ -30,7 +28,7 @@ export default async function ProductPage({
           <div>
             <h1 className="text-3xl font-bold text-[#1b6b80]">{product.title}</h1>
 
-            <ProductActions product={product} rates={rates} />
+            <ProductActions product={product} />
 
             <div className="mt-10 space-y-2 border-t border-neutral-200 pt-6">
               {product.specs.map((spec) => (

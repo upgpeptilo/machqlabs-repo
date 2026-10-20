@@ -9,7 +9,6 @@ export async function placeOrder(order: {
   phone?: string;
   address: string;
   paymentMethod: string;
-  currency: string;
   items: CartItem[];
   total: number;
 }) {
@@ -22,7 +21,7 @@ export async function placeOrder(order: {
       phone: order.phone ?? "",
       address: order.address,
       payment_method: order.paymentMethod,
-      currency: order.currency,
+      currency: "USD", // ponytail: column is NOT NULL and never shown; prices are stored in this base
       items: order.items,
       total: order.total,
     })

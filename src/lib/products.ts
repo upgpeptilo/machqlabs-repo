@@ -26,7 +26,7 @@ export function priceRange(variants: ProductVariant[]) {
   const prices = variants.map((v) => v.price);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  return min === max ? `$${min.toFixed(2)}` : `$${min.toFixed(2)} – $${max.toFixed(2)}`;
+  return min === max ? min.toFixed(2) : `${min.toFixed(2)} – ${max.toFixed(2)}`;
 }
 
 export const storageText =

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import ImageUploader from "./ImageUploader";
 import type { Product, ProductSpec, ProductVariant } from "@/lib/products";
-import { formatUsdAmount, type UsdRates } from "@/lib/currency";
 
 const KNOWN_SPECS = ["CAS Number", "Molecular Formula", "Molecular Weight", "Purity", "Peptide Sequence"];
 
@@ -16,13 +15,11 @@ export default function ProductForm({
   action,
   submitLabel,
   cancelHref = "/admin",
-  rates,
 }: {
   product?: Product;
   action: (formData: FormData) => void;
   submitLabel: string;
   cancelHref?: string;
-  rates: UsdRates;
 }) {
   const [extraSpecs, setExtraSpecs] = useState<ProductSpec[]>(
     () => product?.specs.filter((s) => !KNOWN_SPECS.includes(s.label)) ?? []
@@ -116,9 +113,6 @@ export default function ProductForm({
                     onChange={(e) => updateVariant(index, "price", e.target.value)}
                     className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 focus:border-[#1b6b80] focus:outline-none"
                   />
-                  {variant.price > 0 && (
-                    <p className="mt-1 text-xs text-neutral-500">{formatUsdAmount(variant.price, rates)}</p>
-                  )}
                 </div>
                 <button
                   type="button"

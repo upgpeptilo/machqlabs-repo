@@ -29,7 +29,7 @@ export default async function OrdersPage() {
                 {order.name} · {order.email}
               </span>
               <span className="text-sm font-semibold text-neutral-700">
-                {order.total} {order.currency}
+                {order.total}
               </span>
               <StatusSelect orderId={order.id} status={order.status} />
               <span className="text-xs text-neutral-400">{new Date(order.created_at).toLocaleString()}</span>
