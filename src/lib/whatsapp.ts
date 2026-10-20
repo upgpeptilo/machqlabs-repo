@@ -26,7 +26,6 @@ export function buildOrderWhatsappMessage(order: {
   name: string;
   items: WhatsappOrderItem[];
   total: number;
-  currency: string;
 }): string {
   const lines = [
     `Hi! I just placed order ORD-${String(order.orderNumber).padStart(4, "0")} on MachQ Labs.`,
@@ -37,7 +36,7 @@ export function buildOrderWhatsappMessage(order: {
       (item) => `- ${item.title}${item.size ? ` (${item.size})` : ""} x${item.qty} — ${item.price}`
     ),
     "",
-    `Total: ${order.total} ${order.currency}`,
+    `Total: ${order.total}`,
   ];
   return lines.join("\n");
 }
