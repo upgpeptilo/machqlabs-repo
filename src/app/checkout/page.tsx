@@ -16,10 +16,7 @@ type Option = { name: string; logo?: string; emoji?: string };
 const payLogo = (file: string) => `/images/payment/${encodeURIComponent(file)}`;
 
 const PAYMENT_METHODS: Option[] = [
-  { name: "Visa Card", logo: payLogo("Cards.png") },
   { name: "Cryptocurrency", logo: payLogo("Bitcoin.png") },
-  { name: "Cash App", logo: payLogo("Cash App.png") },
-  { name: "Zelle", logo: payLogo("zelle.png") },
   { name: "Bank Transfer", logo: payLogo("BankTransfer.png") },
 ];
 
