@@ -8,7 +8,6 @@ import { useCart, type CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { formatAmount } from "@/lib/currency";
 import type { ProductVariant } from "@/lib/products";
-import { buildOrderWhatsappMessage, buildWhatsappLink } from "@/lib/whatsapp";
 import { placeOrder } from "./actions";
 
 type Option = { name: string; logo?: string; emoji?: string };
@@ -105,22 +104,15 @@ function CheckoutContent() {
   const [payment, setPayment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
-  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [confirmedOrder, setConfirmedOrder] = useState<{
     name: string;
+    email: string;
+    phone: string;
+    address: string;
+    payment: string;
     items: CartItem[];
     total: number;
   } | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "whatsapp_number")
-      .maybeSingle()
-      .then(({ data }) => setWhatsappNumber(data?.value ?? ""));
-  }, []);
 
   useEffect(() => {
     if (!buySlug) return;
@@ -168,7 +160,7 @@ function CheckoutContent() {
         total: subtotal,
       });
       setOrderNumber(number);
-      setConfirmedOrder({ name, items, total: subtotal });
+      setConfirmedOrder({ name, email: String(data.get("email")), phone, address: String(data.get("address")), payment, items, total: subtotal });
       setSubmitted(true);
       if (!buySlug) clear();
     } catch {
@@ -187,25 +179,30 @@ function CheckoutContent() {
             ORD-{String(orderNumber).padStart(4, "0")}
           </span>
           .
-          We&apos;ll email you at the address you provided to confirm payment and shipping.
+          Please send the prepared email below so our team can confirm payment and shipping.
         </p>
         <div className="mt-6 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-left text-sm text-neutral-600">
           <p className="font-semibold text-neutral-900">What happens next?</p>
-          <p>1. Our team reviews your order, usually within 24 hours.</p>
-          <p>2. We&apos;ll email you to confirm payment details and finalize your order.</p>
+          <p>1. Open and send the prepared email to complete your order request.</p>
+          <p>2. Our team will review your request and reply with payment details.</p>
           <p>3. Once payment is confirmed, your order is processed and shipped.</p>
         </div>
-        {whatsappNumber && confirmedOrder && orderNumber && (
+        {confirmedOrder && orderNumber && (
           <a
-            href={buildWhatsappLink(
-              whatsappNumber,
-              buildOrderWhatsappMessage({ orderNumber, ...confirmedOrder })
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded bg-[#25D366] px-5 py-2.5 font-semibold text-white hover:bg-[#1ebe5b]"
+            href={`mailto:info@machqlab.com?subject=${encodeURIComponent(`Order ORD-${String(orderNumber).padStart(4, "0")}`)}&body=${encodeURIComponent([
+              `Order: ORD-${String(orderNumber).padStart(4, "0")}`,
+              `Name: ${confirmedOrder.name}`,
+              `Email: ${confirmedOrder.email}`,
+              `Phone: ${confirmedOrder.phone}`,
+              `Shipping address: ${confirmedOrder.address}`,
+              `Payment method: ${confirmedOrder.payment}`,
+              "Items:",
+              ...confirmedOrder.items.map((item) => `${item.title} ${item.size} × ${item.qty}: ${formatAmount(item.price * item.qty)}`),
+              `Total: ${formatAmount(confirmedOrder.total)}`,
+            ].join("\n"))}`}
+            className="mt-4 inline-flex items-center justify-center rounded bg-[#1b6b80] px-5 py-2.5 font-semibold text-white hover:bg-[#164f5f]"
           >
-            Confirm Order on WhatsApp
+            Send Order by Email
           </a>
         )}
         <div>
