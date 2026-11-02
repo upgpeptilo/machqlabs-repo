@@ -48,11 +48,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 space-y-1 border-t border-white/15 pt-6 text-xs leading-relaxed text-white/60">
-          <p>MachQ Labs. For research purposes.</p>
+          <p>MachQ Labs. UK based. Worldwide shipping. For research purposes.</p>
           <p>
             MachQLabs is the trading name of CLIENTMACH LTD, a company registered in England &amp; Wales under
-            company number 15764475 and whose registered address is 4410 Brookfield Corporate Dr #223983,
-            Chantilly, VA 20151
+            company number 15764475. Based in the United Kingdom, serving research customers worldwide.
           </p>
           <p>support@machqlabs.com · VAT Number GB516977157</p>
           <p>© {new Date().getFullYear()} MachQ Labs. All Rights Reserved.</p>

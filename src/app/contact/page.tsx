@@ -8,7 +8,9 @@ export default function ContactPage() {
         Fill in the form below or email support@machqlabs.com, a member of the team will be in
         touch shortly.
       </p>
-      <p className="mt-1 text-sm text-neutral-400">Chantilly, VA</p>
+      <p className="mt-1 text-sm text-neutral-400">United Kingdom · Worldwide shipping</p>
+
+      <p className="mt-3 text-sm text-neutral-600">We are UK based and offer UK and worldwide shipping. Include your destination country when asking about delivery availability, costs or timing.</p>
 
       <form className="mt-8 space-y-4">
         <div>

@@ -29,14 +29,6 @@ export default function ProductActions({ product }: { product: Product }) {
   return (
     <>
       <p className="mt-2 text-xl text-neutral-700">{formatAmount(price)}</p>
-      <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#eef7f9] px-3 py-1 text-xs font-semibold text-[#1b6b80]">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
-          <path d="M9 2h6v4l1 2v12a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V8l1-2V2Z" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M8 14h8" strokeLinecap="round" />
-        </svg>
-        Pack of 10 vials
-      </span>
-
       {product.variants.length > 0 && (
         <div className="mt-6">
           <p className="text-sm font-semibold uppercase text-neutral-500">Size</p>

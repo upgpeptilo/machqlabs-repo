@@ -85,7 +85,7 @@ export default function ProductForm({
 
         <div className="border-t border-neutral-200 pt-6">
           <h3 className="font-semibold text-neutral-900">Sizes &amp; Pricing</h3>
-          <p className="mt-1 text-xs text-neutral-500">Sold as a pack of 10 vials. Set a price for each size.</p>
+          <p className="mt-1 text-xs text-neutral-500">Set a price for each available size.</p>
 
           <div className="mt-4 space-y-3">
             {variants.map((variant, index) => (

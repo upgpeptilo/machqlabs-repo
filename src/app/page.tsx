@@ -16,22 +16,34 @@ const valueProps = [
   },
   {
     title: "Secure Worldwide Fulfilment",
-    body: "Carefully packaged orders shipped promptly worldwide.",
+    body: "UK-based service with carefully packaged orders and worldwide shipping.",
   },
 ];
 
 const faqs = [
   {
     q: "What happens when I order?",
-    a: "You will receive an email to confirm receipt of payment, please check your junk folder as they sometimes end up in there. Our dispatch team will then promptly process your order, this is normally in 1-2 business days. You will receive an email confirmation and tracking information once shipped.",
+    a: "Complete checkout and send the prepared order email to our team. We will confirm availability, payment arrangements and delivery details for your destination. Your order request does not confirm payment or dispatch. Please check your inbox and junk folder for our reply.",
   },
   {
     q: "My bottle doesn't look the same as the website?",
     a: "Packaging may differ between batches. The contents of each bottle are verified through independent third-party testing to ensure quality standards are met.",
   },
   {
-    q: "Do you ship outside of the US?",
-    a: "We currently only ship within the United States. Apologies for any inconvenience.",
+    q: "Where is MachQ Labs based?",
+    a: "MachQ Labs is based in the United Kingdom and serves research customers in the UK and worldwide.",
+  },
+  {
+    q: "Do you ship worldwide from your UK-based business?",
+    a: "Yes. We offer UK and worldwide shipping. Availability for a particular destination depends on the product, courier service and applicable import requirements. Contact our team before ordering if you need confirmation for your country.",
+  },
+  {
+    q: "How long will delivery take?",
+    a: "Delivery times depend on your destination, the selected service and customs clearance. Our team will confirm the estimated delivery time and any shipping charges before your order is finalised. International deliveries may take longer than UK deliveries.",
+  },
+  {
+    q: "Will international orders have customs charges?",
+    a: "International orders may be subject to customs duties, local taxes or import restrictions in the destination country. Check the requirements that apply to your order and contact our team for available shipping information before payment.",
   },
   {
     q: "Do you provide Certificate of Analysis (CoA)'s with your products?",
@@ -49,8 +61,11 @@ export default async function Home() {
           For Research Purposes Only
         </p>
         <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-          A trusted supplier of premium peptides for scientific research and development
+          UK-based supplier of peptides for scientific research and development
         </h1>
+        <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">
+          Based in the United Kingdom. Shipping to research customers across the UK and worldwide.
+        </p>
         <div className="mt-8 flex justify-center gap-4">
           <Link
             href="/products"
