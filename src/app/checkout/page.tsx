@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatAmount } from "@/lib/currency";
 import type { ProductVariant } from "@/lib/products";
 import { placeOrder } from "./actions";
+import { readVisitSource } from "@/lib/source";
 
 type Option = { name: string; logo?: string; emoji?: string };
 
@@ -158,6 +159,7 @@ function CheckoutContent() {
         paymentMethod: payment,
         items,
         total: subtotal,
+        ...(readVisitSource() ?? {}),
       });
       setOrderNumber(number);
       setConfirmedOrder({ name, email: String(data.get("email")), phone, address: String(data.get("address")), payment, items, total: subtotal });

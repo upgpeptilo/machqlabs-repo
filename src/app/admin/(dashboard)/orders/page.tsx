@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import StatusSelect from "@/components/admin/StatusSelect";
 import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
+import SourceBadge from "@/components/admin/SourceBadge";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 
 export const metadata = { title: "Orders – Admin" };
@@ -14,9 +15,32 @@ export default async function OrdersPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  // orders per traffic source, most first
+  const sourceCounts = Object.entries(
+    (orders ?? []).reduce<Record<string, number>>((acc, o) => {
+      const s = o.source || "Direct";
+      acc[s] = (acc[s] ?? 0) + 1;
+      return acc;
+    }, {})
+  ).sort((a, b) => b[1] - a[1]);
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-[#1b6b80]">Orders</h1>
+
+      {sourceCounts.length > 0 && (
+        <div className="mt-4 max-w-3xl rounded-lg border border-neutral-200 bg-white p-4">
+          <p className="text-sm font-semibold text-neutral-700">Orders by source</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {sourceCounts.map(([source, count]) => (
+              <span key={source} className="inline-flex items-center gap-1.5">
+                <SourceBadge source={source} />
+                <span className="text-sm font-semibold text-neutral-700">{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 max-w-3xl divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
         {(orders ?? []).map((order) => (
@@ -25,6 +49,7 @@ export default async function OrdersPage() {
               <span className="rounded-full bg-[#eef7f9] px-2.5 py-1 text-sm font-semibold text-[#1b6b80]">
                 ORD-{String(order.order_number).padStart(4, "0")}
               </span>
+              <SourceBadge source={order.source} />
               <span className="flex-1 text-sm text-neutral-700">
                 {order.name} · {order.email}
               </span>
@@ -37,6 +62,11 @@ export default async function OrdersPage() {
             <div className="space-y-1 border-t border-neutral-100 p-4 pt-3 text-sm text-neutral-600">
               <p>Address: {order.address}</p>
               <p>Payment: {order.payment_method}</p>
+              <p className="flex flex-wrap items-center gap-2">
+                <span>Source:</span> <SourceBadge source={order.source} />
+                {order.referrer && <span className="break-all text-xs text-neutral-400">via {order.referrer}</span>}
+              </p>
+              {order.landing && <p className="break-all text-xs text-neutral-400">Landed on: {order.landing}</p>}
               {order.phone && (
                 <p className="flex flex-wrap items-center gap-2">
                   <span>Phone: {order.phone}</span>

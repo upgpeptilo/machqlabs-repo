@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const payload = JSON.stringify({
     title: "New Order",
-    body: `Order #${order.order_number} from ${order.name}`,
+    body: `Order #${order.order_number} from ${order.name}${order.source ? ` · via ${order.source}` : ""}`,
     url: "/admin/orders",
   });
 
