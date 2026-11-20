@@ -19,6 +19,43 @@ const PAYMENT_METHODS: Option[] = [
   { name: "Bank Transfer", logo: payLogo("BankTransfer.png") },
 ];
 
+const BTC_WALLET_ADDRESS = "bc1q2ag6mkjeq368xl9x8ente9hp7g5ff792e0lrct";
+
+function BitcoinWallet() {
+  const [copied, setCopied] = useState(false);
+
+  async function copyAddress() {
+    try {
+      await navigator.clipboard.writeText(BTC_WALLET_ADDRESS);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-[#1b6b80] bg-[#eef7f9] p-4">
+      <p className="text-sm font-semibold text-neutral-900">Bitcoin (BTC) Wallet Address</p>
+      <p className="mt-1 text-xs text-neutral-600">
+        Send your payment to this address. Use the Bitcoin network only.
+      </p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <code className="flex-1 break-all rounded border border-neutral-300 bg-white px-3 py-2 font-mono text-sm text-neutral-900 select-all">
+          {BTC_WALLET_ADDRESS}
+        </code>
+        <button
+          type="button"
+          onClick={copyAddress}
+          className="rounded bg-[#1b6b80] px-4 py-2 text-sm font-semibold text-white hover:bg-[#164f5f]"
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function OptionDropdown({
   label,
   options,
@@ -287,6 +324,7 @@ function CheckoutContent() {
           value={payment}
           onChange={setPayment}
         />
+        {payment === "Cryptocurrency" && <BitcoinWallet />}
         <p className="text-xs text-neutral-500">We&apos;ll email you to confirm payment and shipping after you place your order.</p>
         <button
           type="submit"
